@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EntryController;
+use App\Http\Controllers\WeeklyReportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -60,6 +61,12 @@ Route::group(['middleware' => 'pgcsso.checkauth'], function () {
     // Additional entry routes
     Route::post('/entries/bulk-delete', [EntryController::class, 'bulkDelete']);
     Route::get('/entries/date-range', [EntryController::class, 'getByDateRange']);
+
+    // Weekly Reports CRUD routes
+    Route::apiResource('weekly-reports', WeeklyReportController::class);
+
+    // Additional weekly report routes
+    Route::patch('/weekly-reports/{weeklyReport}/status', [WeeklyReportController::class, 'updateStatus']);
 });
 
 // Health check endpoint (public)
