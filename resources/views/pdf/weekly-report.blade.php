@@ -27,21 +27,22 @@
         }
 
         .header {
-            text-align: center;
             margin-bottom: 30px;
             border-bottom: 2px solid #000;
             padding-bottom: 15px;
         }
 
         .header-content {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
+            position: relative;
+            text-align: center;
+            padding-left: 0;
         }
 
         .logo-section {
-            flex-shrink: 0;
+            position: absolute;
+            left: 10%;
+            top: 30%;
+            transform: translate(-50%, -50%);
         }
 
         .logo {
@@ -51,7 +52,7 @@
         }
 
         .text-section {
-            flex: 1;
+            display: inline-block;
         }
 
         .agency-name {
@@ -97,6 +98,7 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             text-decoration: underline;
+            text-align: center;
         }
 
         .employee-info {
@@ -256,12 +258,12 @@
                 <div class="city-name">Tuguegarao City, Cagayan</div>
                 <div class="office-title">PROVINCIAL ADMINISTRATOR'S OFFICE</div>
                 <div class="division-name">INFORMATION SYSTEMS DIVISION</div>
-                <div class="report-title">WEEKLY ACCOMPLISHMENT REPORT - {{ strtoupper($report->period_start->format('F j') . '-' . $report->period_end->format('j, Y')) }}</div>
             </div>
         </div>
     </div>
 
-  
+    <div class="report-title">WEEKLY ACCOMPLISHMENT REPORT - {{ strtoupper($report->period_start->format('F j') . '-' . $report->period_end->format('j, Y')) }}</div>
+
 
     <table class="accomplishment-table">
         <thead>
@@ -306,6 +308,7 @@
     <div class="signature-section">
         <div class="signature-row">
             <div class="signature-block">
+                <div style="margin-bottom: 10px;">Prepared by:</div>
                 <div class="signature-line"></div>
                 <div class="signature-label">{{ $employee->name ?? 'Employee Name' }}</div>
                 
