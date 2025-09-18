@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\WeeklyReport;
-use Barryvdh\Snappy\Facades\SnappyPdf;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\View;
 
 class PdfGeneratorService
@@ -34,16 +34,8 @@ class PdfGeneratorService
 
         $html = View::make('pdf.weekly-report', $data)->render();
 
-        return SnappyPdf::loadHTML($html)
-            ->setPaper('a4')
-            ->setOrientation('portrait')
-            ->setOption('margin-top', 10)
-            ->setOption('margin-right', 10)
-            ->setOption('margin-bottom', 10)
-            ->setOption('margin-left', 10)
-            ->setOption('enable-local-file-access', true)
-            ->setOption('print-media-type', true)
-            ->setOption('disable-smart-shrinking', true)
+        return Pdf::loadHTML($html)
+            ->setPaper('a4', 'portrait')
             ->output();
     }
 
@@ -79,16 +71,8 @@ class PdfGeneratorService
             $weeklyReport->period_end->format('Y-m-d')
         );
 
-        return SnappyPdf::loadHTML($html)
-            ->setPaper('a4')
-            ->setOrientation('portrait')
-            ->setOption('margin-top', 10)
-            ->setOption('margin-right', 10)
-            ->setOption('margin-bottom', 10)
-            ->setOption('margin-left', 10)
-            ->setOption('enable-local-file-access', true)
-            ->setOption('print-media-type', true)
-            ->setOption('disable-smart-shrinking', true)
+        return Pdf::loadHTML($html)
+            ->setPaper('a4', 'portrait')
             ->download($filename);
     }
 
@@ -118,16 +102,8 @@ class PdfGeneratorService
 
         $html = View::make('pdf.weekly-report', $data)->render();
 
-        return SnappyPdf::loadHTML($html)
-            ->setPaper('a4')
-            ->setOrientation('portrait')
-            ->setOption('margin-top', 10)
-            ->setOption('margin-right', 10)
-            ->setOption('margin-bottom', 10)
-            ->setOption('margin-left', 10)
-            ->setOption('enable-local-file-access', true)
-            ->setOption('print-media-type', true)
-            ->setOption('disable-smart-shrinking', true)
-            ->inline();
+        return Pdf::loadHTML($html)
+            ->setPaper('a4', 'portrait')
+            ->stream();
     }
 }
