@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EntryController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\WeeklyReportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -67,6 +68,11 @@ Route::group(['middleware' => 'pgcsso.checkauth'], function () {
 
     // Additional weekly report routes
     Route::patch('/weekly-reports/{weeklyReport}/status', [WeeklyReportController::class, 'updateStatus']);
+
+    // PDF generation routes
+    Route::get('/weekly-reports/{weeklyReport}/pdf/download', [ReportController::class, 'downloadWeeklyReportPdf'])->name('weekly-reports.pdf.download');
+    Route::get('/weekly-reports/{weeklyReport}/pdf/preview', [ReportController::class, 'previewWeeklyReportPdf'])->name('weekly-reports.pdf.preview');
+    Route::post('/weekly-reports/{weeklyReport}/pdf/generate', [ReportController::class, 'generateWeeklyReportPdf'])->name('weekly-reports.pdf.generate');
 });
 
 // Health check endpoint (public)
