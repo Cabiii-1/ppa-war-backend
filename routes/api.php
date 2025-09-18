@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EntryController;
+use App\Http\Controllers\HealthController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\WeeklyReportController;
 use Illuminate\Http\Request;
@@ -18,14 +19,18 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Public authentication routes (no middleware required)
-Route::group(['prefix' => 'auth'], function () {
-    // Login endpoint - POST /api/auth/login
+// Health check endpoints (no authentication required)
+Route::get('/health', [HealthController::class, 'basic']);
+Route::get('/health/detailed', [HealthController::class, 'detailed'])->middleware('throttle:5,1');
+
+// Public authentication routes with rate limiting
+Route::group(['prefix' => 'auth', 'middleware' => 'throttle:10,1'], function () {
+    // Login endpoint - POST /api/auth/login (10 attempts per minute)
     Route::post('/login', [AuthController::class, 'login']);
 });
 
-// Frontend expected routes (matching the auth service endpoints)
-Route::post('/login', [AuthController::class, 'login']);
+// Frontend expected routes with rate limiting
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
 
 // Protected authentication routes (requires authentication middleware)
 Route::group(['prefix' => 'auth', 'middleware' => 'pgcsso.checkauth'], function () {
@@ -39,8 +44,8 @@ Route::group(['prefix' => 'auth', 'middleware' => 'pgcsso.checkauth'], function 
     Route::post('/logout-all', [AuthController::class, 'logoutAllDevices']);
 });
 
-// Frontend expected protected routes
-Route::group(['middleware' => 'pgcsso.checkauth'], function () {
+// Frontend expected protected routes with API rate limiting
+Route::group(['middleware' => ['pgcsso.checkauth', 'throttle:100,1']], function () {
     // Get current user - GET /api/user (frontend expects this endpoint)
     Route::get('/user', [AuthController::class, 'me']);
 
