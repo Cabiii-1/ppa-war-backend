@@ -8,12 +8,17 @@ use Illuminate\Support\Facades\View;
 
 class PdfGeneratorService
 {
-    public function generateWeeklyReportPdf(WeeklyReport $weeklyReport): string
+    public function generateWeeklyReportPdf(WeeklyReport $weeklyReport, $user = null): string
     {
         $weeklyReport->load(['entries']);
 
-        // Create a mock employee object with the available data
-        $mockEmployee = (object) [
+        // Use the authenticated user or fallback to mock data
+        $employee = $user ? (object) [
+            'name' => $user->Fullname ?? $user->name ?? $user->emp_name ?? 'Employee Name',
+            'position' => $user->position ?? 'Position Title',
+            'department' => $user->department ?? 'Department Name',
+            'emp_no' => $user->emp_no ?? $weeklyReport->employee_id ?? 'N/A'
+        ] : (object) [
             'name' => 'Employee Name',
             'position' => 'Position Title',
             'department' => 'Department Name',
@@ -23,7 +28,7 @@ class PdfGeneratorService
         $data = [
             'report' => $weeklyReport,
             'entries' => $weeklyReport->entries,
-            'employee' => $mockEmployee,
+            'employee' => $employee,
             'generatedAt' => now(),
         ];
 
@@ -42,12 +47,17 @@ class PdfGeneratorService
             ->output();
     }
 
-    public function downloadWeeklyReportPdf(WeeklyReport $weeklyReport): \Symfony\Component\HttpFoundation\Response
+    public function downloadWeeklyReportPdf(WeeklyReport $weeklyReport, $user = null): \Symfony\Component\HttpFoundation\Response
     {
         $weeklyReport->load(['entries']);
 
-        // Create a mock employee object with the available data
-        $mockEmployee = (object) [
+        // Use the authenticated user or fallback to mock data
+        $employee = $user ? (object) [
+            'name' => $user->Fullname ?? $user->name ?? $user->emp_name ?? 'Employee Name',
+            'position' => $user->position ?? 'Position Title',
+            'department' => $user->department ?? 'Department Name',
+            'emp_no' => $user->emp_no ?? $weeklyReport->employee_id ?? 'N/A'
+        ] : (object) [
             'name' => 'Employee Name',
             'position' => 'Position Title',
             'department' => 'Department Name',
@@ -57,7 +67,7 @@ class PdfGeneratorService
         $data = [
             'report' => $weeklyReport,
             'entries' => $weeklyReport->entries,
-            'employee' => $mockEmployee,
+            'employee' => $employee,
             'generatedAt' => now(),
         ];
 
@@ -82,12 +92,17 @@ class PdfGeneratorService
             ->download($filename);
     }
 
-    public function previewWeeklyReportPdf(WeeklyReport $weeklyReport): \Symfony\Component\HttpFoundation\Response
+    public function previewWeeklyReportPdf(WeeklyReport $weeklyReport, $user = null): \Symfony\Component\HttpFoundation\Response
     {
         $weeklyReport->load(['entries']);
 
-        // Create a mock employee object with the available data
-        $mockEmployee = (object) [
+        // Use the authenticated user or fallback to mock data
+        $employee = $user ? (object) [
+            'name' => $user->Fullname ?? $user->name ?? $user->emp_name ?? 'Employee Name',
+            'position' => $user->position ?? 'Position Title',
+            'department' => $user->department ?? 'Department Name',
+            'emp_no' => $user->emp_no ?? $weeklyReport->employee_id ?? 'N/A'
+        ] : (object) [
             'name' => 'Employee Name',
             'position' => 'Position Title',
             'department' => 'Department Name',
@@ -97,7 +112,7 @@ class PdfGeneratorService
         $data = [
             'report' => $weeklyReport,
             'entries' => $weeklyReport->entries,
-            'employee' => $mockEmployee,
+            'employee' => $employee,
             'generatedAt' => now(),
         ];
 
