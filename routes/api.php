@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EntryController;
+use App\Http\Controllers\EnumController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\WeeklyReportController;
@@ -78,6 +79,9 @@ Route::group(['middleware' => ['pgcsso.checkauth', 'throttle:100,1']], function 
     Route::get('/weekly-reports/{weeklyReport}/pdf/download', [ReportController::class, 'downloadWeeklyReportPdf'])->name('weekly-reports.pdf.download');
     Route::get('/weekly-reports/{weeklyReport}/pdf/preview', [ReportController::class, 'previewWeeklyReportPdf'])->name('weekly-reports.pdf.preview');
     Route::post('/weekly-reports/{weeklyReport}/pdf/generate', [ReportController::class, 'generateWeeklyReportPdf'])->name('weekly-reports.pdf.generate');
+
+    // Enum endpoints
+    Route::get('/enums/status-options', [EnumController::class, 'getStatusOptions']);
 });
 
 // Health check endpoint (public)
