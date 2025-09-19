@@ -15,8 +15,8 @@ class PdfGeneratorService
         // Use the authenticated user or fallback to mock data
         $employee = $user ? (object) [
             'name' => $user->Fullname ?? $user->name ?? $user->emp_name ?? 'Employee Name',
-            'position' => $user->position ?? 'Position Title',
-            'department' => $user->department ?? 'Department Name',
+            'position' => $user->PosDesc ?? $user->position ?? 'Position Title',
+            'department' => $user->DeptDesc ?? $user->department ?? 'Department Name',
             'emp_no' => $user->emp_no ?? $weeklyReport->employee_id ?? 'N/A'
         ] : (object) [
             'name' => 'Employee Name',
@@ -46,8 +46,8 @@ class PdfGeneratorService
         // Use the authenticated user or fallback to mock data
         $employee = $user ? (object) [
             'name' => $user->Fullname ?? $user->name ?? $user->emp_name ?? 'Employee Name',
-            'position' => $user->position ?? 'Position Title',
-            'department' => $user->department ?? 'Department Name',
+            'position' => $user->PosDesc ?? $user->position ?? 'Position Title',
+            'department' => $user->DeptDesc ?? $user->department ?? 'Department Name',
             'emp_no' => $user->emp_no ?? $weeklyReport->employee_id ?? 'N/A'
         ] : (object) [
             'name' => 'Employee Name',
@@ -83,8 +83,8 @@ class PdfGeneratorService
         // Use the authenticated user or fallback to mock data
         $employee = $user ? (object) [
             'name' => $user->Fullname ?? $user->name ?? $user->emp_name ?? 'Employee Name',
-            'position' => $user->position ?? 'Position Title',
-            'department' => $user->department ?? 'Department Name',
+            'position' => $user->PosDesc ?? $user->position ?? 'Position Title',
+            'department' => $user->DeptDesc ?? $user->department ?? 'Department Name',
             'emp_no' => $user->emp_no ?? $weeklyReport->employee_id ?? 'N/A'
         ] : (object) [
             'name' => 'Employee Name',

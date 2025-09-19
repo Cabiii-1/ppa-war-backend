@@ -171,7 +171,7 @@
         <h2>PROVINCE OF CAGAYAN</h2>
         <h3>Tuguegarao City, Cagayan</h3>
         <h2>PROVINCIAL ADMINISTRATOR'S OFFICE</h2>
-        <h3>INFORMATION SYSTEMS DIVISION</h3>
+        <h3>{{ $employee->department }}</h3>
     </div>
 
     <div class="report-title">
