@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Entry;
+use App\Models\WeeklyReport;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -138,7 +139,13 @@ class EntryController extends Controller
     public function destroy(Entry $entry): JsonResponse
     {
         try {
+            $weeklyReportId = $entry->weekly_report_id;
             $entry->delete();
+
+            // Check if the weekly report now has no entries and delete it if empty
+            if ($weeklyReportId) {
+                $this->cleanupEmptyWeeklyReport($weeklyReportId);
+            }
 
             return response()->json([
                 'success' => true,
@@ -161,7 +168,18 @@ class EntryController extends Controller
                 'ids.*' => 'integer|exists:entries,id',
             ]);
 
+            // Get weekly report IDs before deletion for cleanup
+            $weeklyReportIds = Entry::whereIn('id', $validated['ids'])
+                ->whereNotNull('weekly_report_id')
+                ->pluck('weekly_report_id')
+                ->unique();
+
             $deletedCount = Entry::whereIn('id', $validated['ids'])->delete();
+
+            // Check and cleanup any weekly reports that are now empty
+            foreach ($weeklyReportIds as $weeklyReportId) {
+                $this->cleanupEmptyWeeklyReport($weeklyReportId);
+            }
 
             return response()->json([
                 'success' => true,
@@ -222,6 +240,18 @@ class EntryController extends Controller
                 'message' => 'Failed to retrieve entries by date range',
                 'error' => $e->getMessage(),
             ], 500);
+        }
+    }
+
+    /**
+     * Clean up empty weekly reports by deleting them if they have no entries
+     */
+    private function cleanupEmptyWeeklyReport(int $weeklyReportId): void
+    {
+        $weeklyReport = WeeklyReport::find($weeklyReportId);
+
+        if ($weeklyReport && $weeklyReport->entries()->count() === 0) {
+            $weeklyReport->delete();
         }
     }
 }

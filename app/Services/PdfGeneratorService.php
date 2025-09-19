@@ -25,13 +25,13 @@ class PdfGeneratorService
             'position' => $user->PosDesc ?? $user->position ?? 'Position Title',
             'department' => $user->DeptDesc ?? $user->department ?? 'Department Name',
             'division' => $division,
-            'emp_no' => $user->emp_no ?? $weeklyReport->employee_id ?? 'N/A'
+            'emp_no' => $user->emp_no ?? $weeklyReport->employee_id ?? 'N/A',
         ] : (object) [
             'name' => 'Employee Name',
             'position' => 'Position Title',
             'department' => 'Department Name',
             'division' => '',
-            'emp_no' => $weeklyReport->employee_id ?? 'N/A'
+            'emp_no' => $weeklyReport->employee_id ?? 'N/A',
         ];
 
         $data = [
@@ -65,13 +65,13 @@ class PdfGeneratorService
             'position' => $user->PosDesc ?? $user->position ?? 'Position Title',
             'department' => $user->DeptDesc ?? $user->department ?? 'Department Name',
             'division' => $division,
-            'emp_no' => $user->emp_no ?? $weeklyReport->employee_id ?? 'N/A'
+            'emp_no' => $user->emp_no ?? $weeklyReport->employee_id ?? 'N/A',
         ] : (object) [
             'name' => 'Employee Name',
             'position' => 'Position Title',
             'department' => 'Department Name',
             'division' => '',
-            'emp_no' => $weeklyReport->employee_id ?? 'N/A'
+            'emp_no' => $weeklyReport->employee_id ?? 'N/A',
         ];
 
         $data = [
@@ -111,13 +111,13 @@ class PdfGeneratorService
             'position' => $user->PosDesc ?? $user->position ?? 'Position Title',
             'department' => $user->DeptDesc ?? $user->department ?? 'Department Name',
             'division' => $division,
-            'emp_no' => $user->emp_no ?? $weeklyReport->employee_id ?? 'N/A'
+            'emp_no' => $user->emp_no ?? $weeklyReport->employee_id ?? 'N/A',
         ] : (object) [
             'name' => 'Employee Name',
             'position' => 'Position Title',
             'department' => 'Department Name',
             'division' => '',
-            'emp_no' => $weeklyReport->employee_id ?? 'N/A'
+            'emp_no' => $weeklyReport->employee_id ?? 'N/A',
         ];
 
         $data = [
