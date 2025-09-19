@@ -130,6 +130,76 @@ class WeeklyReportController extends Controller
         }
     }
 
+    public function update(Request $request, WeeklyReport $weeklyReport): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'entry_ids' => 'required|array|min:1',
+                'entry_ids.*' => 'integer|exists:entries,id',
+            ]);
+
+            return DB::transaction(function () use ($validated, $weeklyReport) {
+                // Get the first entry to determine employee_id
+                $firstEntry = Entry::find($validated['entry_ids'][0]);
+                if (! $firstEntry) {
+                    throw new \Exception('Entry not found');
+                }
+
+                // Verify all entries belong to the same employee and match the report's employee
+                $entryEmployeeIds = Entry::whereIn('id', $validated['entry_ids'])
+                    ->pluck('employee_id')
+                    ->unique();
+
+                if ($entryEmployeeIds->count() > 1) {
+                    throw new \Exception('All entries must belong to the same employee');
+                }
+
+                if ($firstEntry->employee_id !== $weeklyReport->employee_id) {
+                    throw new \Exception('Entries must belong to the same employee as the weekly report');
+                }
+
+                // Check if any of the new entries are already assigned to a different weekly report
+                $conflictingEntries = Entry::whereIn('id', $validated['entry_ids'])
+                    ->whereNotNull('weekly_report_id')
+                    ->where('weekly_report_id', '!=', $weeklyReport->id)
+                    ->count();
+
+                if ($conflictingEntries > 0) {
+                    throw new \Exception('Some entries are already assigned to a different weekly report');
+                }
+
+                // Remove weekly_report_id from current entries
+                Entry::where('weekly_report_id', $weeklyReport->id)
+                    ->update(['weekly_report_id' => null]);
+
+                // Assign new entries to the weekly report
+                Entry::whereIn('id', $validated['entry_ids'])
+                    ->update(['weekly_report_id' => $weeklyReport->id]);
+
+                // Load the updated weekly report with entry count
+                $weeklyReport->loadCount('entries');
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Weekly report updated successfully',
+                    'data' => $weeklyReport,
+                ]);
+            });
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update weekly report',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function updateStatus(Request $request, WeeklyReport $weeklyReport): JsonResponse
     {
         try {
