@@ -13,15 +13,24 @@ class PdfGeneratorService
         $weeklyReport->load(['entries']);
 
         // Use the authenticated user or fallback to mock data
+        $division = '';
+        if ($user && isset($user->DivDesc) && $user->DivDesc !== '-None-') {
+            $division = $user->DivDesc;
+        } elseif ($user && isset($user->division) && $user->division !== '-None-') {
+            $division = $user->division;
+        }
+
         $employee = $user ? (object) [
             'name' => $user->Fullname ?? $user->name ?? $user->emp_name ?? 'Employee Name',
             'position' => $user->PosDesc ?? $user->position ?? 'Position Title',
             'department' => $user->DeptDesc ?? $user->department ?? 'Department Name',
+            'division' => $division,
             'emp_no' => $user->emp_no ?? $weeklyReport->employee_id ?? 'N/A'
         ] : (object) [
             'name' => 'Employee Name',
             'position' => 'Position Title',
             'department' => 'Department Name',
+            'division' => '',
             'emp_no' => $weeklyReport->employee_id ?? 'N/A'
         ];
 
@@ -44,15 +53,24 @@ class PdfGeneratorService
         $weeklyReport->load(['entries']);
 
         // Use the authenticated user or fallback to mock data
+        $division = '';
+        if ($user && isset($user->DivDesc) && $user->DivDesc !== '-None-') {
+            $division = $user->DivDesc;
+        } elseif ($user && isset($user->division) && $user->division !== '-None-') {
+            $division = $user->division;
+        }
+
         $employee = $user ? (object) [
             'name' => $user->Fullname ?? $user->name ?? $user->emp_name ?? 'Employee Name',
             'position' => $user->PosDesc ?? $user->position ?? 'Position Title',
             'department' => $user->DeptDesc ?? $user->department ?? 'Department Name',
+            'division' => $division,
             'emp_no' => $user->emp_no ?? $weeklyReport->employee_id ?? 'N/A'
         ] : (object) [
             'name' => 'Employee Name',
             'position' => 'Position Title',
             'department' => 'Department Name',
+            'division' => '',
             'emp_no' => $weeklyReport->employee_id ?? 'N/A'
         ];
 
@@ -81,15 +99,24 @@ class PdfGeneratorService
         $weeklyReport->load(['entries']);
 
         // Use the authenticated user or fallback to mock data
+        $division = '';
+        if ($user && isset($user->DivDesc) && $user->DivDesc !== '-None-') {
+            $division = $user->DivDesc;
+        } elseif ($user && isset($user->division) && $user->division !== '-None-') {
+            $division = $user->division;
+        }
+
         $employee = $user ? (object) [
             'name' => $user->Fullname ?? $user->name ?? $user->emp_name ?? 'Employee Name',
             'position' => $user->PosDesc ?? $user->position ?? 'Position Title',
             'department' => $user->DeptDesc ?? $user->department ?? 'Department Name',
+            'division' => $division,
             'emp_no' => $user->emp_no ?? $weeklyReport->employee_id ?? 'N/A'
         ] : (object) [
             'name' => 'Employee Name',
             'position' => 'Position Title',
             'department' => 'Department Name',
+            'division' => '',
             'emp_no' => $weeklyReport->employee_id ?? 'N/A'
         ];
 

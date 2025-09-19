@@ -56,6 +56,7 @@ class EntryController extends Controller
                 'ppa' => 'required|string',
                 'kpi' => 'required|string',
                 'status' => 'required|string|max:255',
+                'status_comment' => 'nullable|string',
                 'remarks' => 'nullable|string',
                 'weekly_report_id' => 'nullable|exists:weekly_reports,id',
             ]);
@@ -107,6 +108,7 @@ class EntryController extends Controller
                 'ppa' => 'sometimes|required|string',
                 'kpi' => 'sometimes|required|string',
                 'status' => 'sometimes|required|string|max:255',
+                'status_comment' => 'nullable|string',
                 'remarks' => 'nullable|string',
                 'weekly_report_id' => 'nullable|exists:weekly_reports,id',
             ]);

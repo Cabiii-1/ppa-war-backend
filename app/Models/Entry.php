@@ -17,6 +17,7 @@ class Entry extends Model
         'ppa',
         'kpi',
         'status',
+        'status_comment',
         'remarks',
     ];
 
