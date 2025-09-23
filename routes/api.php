@@ -69,11 +69,12 @@ Route::group(['middleware' => ['pgcsso.checkauth', 'throttle:100,1']], function 
     Route::post('/entries/bulk-delete', [EntryController::class, 'bulkDelete']);
     Route::get('/entries/date-range', [EntryController::class, 'getByDateRange']);
 
+    // Additional weekly report routes (must be before apiResource)
+    Route::get('/weekly-reports/department', [WeeklyReportController::class, 'getByDepartment']);
+    Route::patch('/weekly-reports/{weeklyReport}/status', [WeeklyReportController::class, 'updateStatus']);
+
     // Weekly Reports CRUD routes
     Route::apiResource('weekly-reports', WeeklyReportController::class);
-
-    // Additional weekly report routes
-    Route::patch('/weekly-reports/{weeklyReport}/status', [WeeklyReportController::class, 'updateStatus']);
 
     // PDF generation routes
     Route::get('/weekly-reports/{weeklyReport}/pdf/download', [ReportController::class, 'downloadWeeklyReportPdf'])->name('weekly-reports.pdf.download');

@@ -256,4 +256,57 @@ class WeeklyReportController extends Controller
             ], 500);
         }
     }
+
+    public function getByDepartment(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'department' => 'required|string',
+                'status' => 'sometimes|string|in:draft,submitted,archived',
+                'per_page' => 'sometimes|integer|min:1|max:100',
+            ]);
+
+            // Get employee IDs from the specified department
+            $employeeIds = pgc_employee()->table('vEmployee')
+                ->where('DeptDesc', $validated['department'])
+                ->pluck('emp_no');
+
+            if ($employeeIds->isEmpty()) {
+                return response()->json([
+                    'success' => true,
+                    'data' => [
+                        'data' => [],
+                        'current_page' => 1,
+                        'total' => 0,
+                        'per_page' => $request->get('per_page', 15),
+                        'last_page' => 1,
+                        'from' => null,
+                        'to' => null,
+                    ],
+                    'message' => 'No employees found in the specified department',
+                ]);
+            }
+
+            $query = WeeklyReport::whereIn('employee_id', $employeeIds);
+
+            if (isset($validated['status'])) {
+                $query->where('status', $validated['status']);
+            }
+
+            $reports = $query->withCount('entries')
+                ->orderBy('period_start', 'desc')
+                ->paginate($request->get('per_page', 15));
+
+            return response()->json([
+                'success' => true,
+                'data' => $reports,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve weekly reports by department',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }
