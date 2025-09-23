@@ -24,9 +24,43 @@ class WeeklyReportController extends Controller
                 $query->where('status', $request->status);
             }
 
+            if ($request->has('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('employee_id', 'like', "%{$search}%")
+                      ->orWhere('id', 'like', "%{$search}%");
+                });
+            }
+
+            if ($request->has('date_from')) {
+                $query->where('period_start', '>=', $request->date_from);
+            }
+
+            if ($request->has('date_to')) {
+                $query->where('period_end', '<=', $request->date_to);
+            }
+
             $reports = $query->withCount('entries')
                 ->orderBy('period_start', 'desc')
                 ->paginate($request->get('per_page', 15));
+
+            // Get unique employee IDs from the reports
+            $employeeIds = $reports->getCollection()->pluck('employee_id')->unique();
+
+            // Fetch department information for these employees
+            $employeeDepartments = [];
+            if ($employeeIds->isNotEmpty()) {
+                $employeeDepartments = pgc_employee()->table('vEmployee')
+                    ->whereIn('emp_no', $employeeIds)
+                    ->pluck('DeptDesc', 'emp_no')
+                    ->toArray();
+            }
+
+            // Add department information to each report
+            $reports->getCollection()->transform(function ($report) use ($employeeDepartments) {
+                $report->DeptDesc = $employeeDepartments[$report->employee_id] ?? null;
+                return $report;
+            });
 
             return response()->json([
                 'success' => true,
@@ -293,9 +327,43 @@ class WeeklyReportController extends Controller
                 $query->where('status', $validated['status']);
             }
 
+            if ($request->has('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('employee_id', 'like', "%{$search}%")
+                      ->orWhere('id', 'like', "%{$search}%");
+                });
+            }
+
+            if ($request->has('date_from')) {
+                $query->where('period_start', '>=', $request->date_from);
+            }
+
+            if ($request->has('date_to')) {
+                $query->where('period_end', '<=', $request->date_to);
+            }
+
             $reports = $query->withCount('entries')
                 ->orderBy('period_start', 'desc')
                 ->paginate($request->get('per_page', 15));
+
+            // Get unique employee IDs from the reports
+            $reportEmployeeIds = $reports->getCollection()->pluck('employee_id')->unique();
+
+            // Fetch department information for these employees
+            $employeeDepartments = [];
+            if ($reportEmployeeIds->isNotEmpty()) {
+                $employeeDepartments = pgc_employee()->table('vEmployee')
+                    ->whereIn('emp_no', $reportEmployeeIds)
+                    ->pluck('DeptDesc', 'emp_no')
+                    ->toArray();
+            }
+
+            // Add department information to each report
+            $reports->getCollection()->transform(function ($report) use ($employeeDepartments) {
+                $report->DeptDesc = $employeeDepartments[$report->employee_id] ?? null;
+                return $report;
+            });
 
             return response()->json([
                 'success' => true,

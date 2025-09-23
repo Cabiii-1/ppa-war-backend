@@ -96,14 +96,19 @@ class AuthController extends Controller
             $aes256gcmToken = AesGcmHelper::encrypt($md5token, $key);
             $base64Token = base64_encode($aes256gcmToken);
 
+            // Get employee details from employee database using employee_id
+            $employeeDetails = pgc_employee()->table('vEmployee')
+                ->where('emp_no', $accounts->employee_id)
+                ->first();
+
             // Get user data for response
             $userData = [
                 'id' => $accounts->id,
-                'employee_id' => $accounts->emp_no ?? $accounts->employee_id ?? 'N/A',
-                'name' => $accounts->Fullname ?? $accounts->name ?? 'N/A',
-                'email' => $accounts->EmailAdd ?? $accounts->email ?? 'N/A',
-                'department' => $accounts->DeptDesc ?? $accounts->department ?? 'N/A',
-                'position' => $accounts->PosDesc ?? $accounts->position ?? 'N/A',
+                'employee_id' => $accounts->employee_id ?? $accounts->emp_no ?? 'N/A',
+                'name' => $employeeDetails->Fullname ?? $accounts->Fullname ?? $accounts->name ?? $accounts->username ?? 'Unknown User',
+                'email' => $employeeDetails->EmailAdd ?? $accounts->EmailAdd ?? $accounts->email ?? 'N/A',
+                'department' => $employeeDetails->DeptDesc ?? $accounts->DeptDesc ?? $accounts->department ?? 'N/A',
+                'position' => $employeeDetails->PosDesc ?? $accounts->PosDesc ?? $accounts->position ?? 'N/A',
                 'username' => $accounts->username,
                 'manager_id' => $accounts->manager_id ?? null,
             ];
@@ -194,16 +199,21 @@ class AuthController extends Controller
             ], 401);
         }
 
+        // Get employee details from employee database using emp_no
+        $employeeDetails = pgc_employee()->table('vEmployee')
+            ->where('emp_no', $user->emp_no)
+            ->first();
+
         // Format user data according to the implementation guide
         return response()->json([
             'success' => true,
             'data' => [
                 'id' => $user->id ?? null,
                 'employee_id' => $user->emp_no ?? 'N/A',
-                'name' => $user->Fullname ?? 'N/A',
-                'email' => $user->EmailAdd ?? 'N/A',
-                'department' => $user->DeptDesc ?? 'N/A',
-                'position' => $user->PosDesc ?? 'N/A',
+                'name' => $employeeDetails->Fullname ?? $user->Fullname ?? $user->username ?? 'Unknown User',
+                'email' => $employeeDetails->EmailAdd ?? $user->EmailAdd ?? 'N/A',
+                'department' => $employeeDetails->DeptDesc ?? $user->DeptDesc ?? 'N/A',
+                'position' => $employeeDetails->PosDesc ?? $user->PosDesc ?? 'N/A',
                 'username' => $user->username ?? 'N/A',
                 'permissions' => ['view_reports', 'create_reports', 'edit_own_reports']
             ]
