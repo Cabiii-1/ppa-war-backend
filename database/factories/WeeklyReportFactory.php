@@ -23,7 +23,7 @@ class WeeklyReportFactory extends Factory
             'employee_id' => 'EMP'.fake()->numberBetween(1000, 9999),
             'period_start' => $periodStart,
             'period_end' => $periodEnd,
-            'status' => fake()->randomElement(['draft', 'submitted', 'archived']),
+            'status' => fake()->randomElement(['draft', 'submitted']),
             'submitted_at' => fake()->optional(0.7)->dateTimeBetween($periodStart, 'now'),
         ];
     }

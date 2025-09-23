@@ -28,7 +28,7 @@ class WeeklyReportController extends Controller
                 $search = $request->search;
                 $query->where(function ($q) use ($search) {
                     $q->where('employee_id', 'like', "%{$search}%")
-                      ->orWhere('id', 'like', "%{$search}%");
+                        ->orWhere('id', 'like', "%{$search}%");
                 });
             }
 
@@ -47,18 +47,22 @@ class WeeklyReportController extends Controller
             // Get unique employee IDs from the reports
             $employeeIds = $reports->getCollection()->pluck('employee_id')->unique();
 
-            // Fetch department information for these employees
-            $employeeDepartments = [];
+            // Fetch employee information for these employees
+            $employeeInfo = [];
             if ($employeeIds->isNotEmpty()) {
-                $employeeDepartments = pgc_employee()->table('vEmployee')
+                $employeeInfo = pgc_employee()->table('vEmployee')
                     ->whereIn('emp_no', $employeeIds)
-                    ->pluck('DeptDesc', 'emp_no')
+                    ->get(['emp_no', 'DeptDesc', 'Fullname'])
+                    ->keyBy('emp_no')
                     ->toArray();
             }
 
-            // Add department information to each report
-            $reports->getCollection()->transform(function ($report) use ($employeeDepartments) {
-                $report->DeptDesc = $employeeDepartments[$report->employee_id] ?? null;
+            // Add employee information to each report
+            $reports->getCollection()->transform(function ($report) use ($employeeInfo) {
+                $empInfo = $employeeInfo[$report->employee_id] ?? null;
+                $report->DeptDesc = $empInfo ? $empInfo->DeptDesc : null;
+                $report->FullName = $empInfo ? $empInfo->Fullname : null;
+
                 return $report;
             });
 
@@ -238,7 +242,7 @@ class WeeklyReportController extends Controller
     {
         try {
             $validated = $request->validate([
-                'status' => 'required|in:draft,submitted,archived',
+                'status' => 'required|in:draft,submitted',
             ]);
 
             $weeklyReport->update([
@@ -296,7 +300,7 @@ class WeeklyReportController extends Controller
         try {
             $validated = $request->validate([
                 'department' => 'required|string',
-                'status' => 'sometimes|string|in:draft,submitted,archived',
+                'status' => 'sometimes|string|in:draft,submitted',
                 'per_page' => 'sometimes|integer|min:1|max:100',
             ]);
 
@@ -331,7 +335,7 @@ class WeeklyReportController extends Controller
                 $search = $request->search;
                 $query->where(function ($q) use ($search) {
                     $q->where('employee_id', 'like', "%{$search}%")
-                      ->orWhere('id', 'like', "%{$search}%");
+                        ->orWhere('id', 'like', "%{$search}%");
                 });
             }
 
@@ -350,18 +354,22 @@ class WeeklyReportController extends Controller
             // Get unique employee IDs from the reports
             $reportEmployeeIds = $reports->getCollection()->pluck('employee_id')->unique();
 
-            // Fetch department information for these employees
-            $employeeDepartments = [];
+            // Fetch employee information for these employees
+            $employeeInfo = [];
             if ($reportEmployeeIds->isNotEmpty()) {
-                $employeeDepartments = pgc_employee()->table('vEmployee')
+                $employeeInfo = pgc_employee()->table('vEmployee')
                     ->whereIn('emp_no', $reportEmployeeIds)
-                    ->pluck('DeptDesc', 'emp_no')
+                    ->get(['emp_no', 'DeptDesc', 'Fullname'])
+                    ->keyBy('emp_no')
                     ->toArray();
             }
 
-            // Add department information to each report
-            $reports->getCollection()->transform(function ($report) use ($employeeDepartments) {
-                $report->DeptDesc = $employeeDepartments[$report->employee_id] ?? null;
+            // Add employee information to each report
+            $reports->getCollection()->transform(function ($report) use ($employeeInfo) {
+                $empInfo = $employeeInfo[$report->employee_id] ?? null;
+                $report->DeptDesc = $empInfo ? $empInfo->DeptDesc : null;
+                $report->FullName = $empInfo ? $empInfo->Fullname : null;
+
                 return $report;
             });
 

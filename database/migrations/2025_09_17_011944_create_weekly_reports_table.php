@@ -17,7 +17,7 @@ return new class extends Migration
             $table->date('period_start');
             $table->date('period_end');
             $table->timestamp('submitted_at')->useCurrent();
-            $table->enum('status', ['draft', 'submitted', 'archived'])->default('draft');
+            $table->enum('status', ['draft', 'submitted'])->default('draft');
             $table->timestamps();
         });
     }
