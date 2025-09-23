@@ -309,4 +309,29 @@ class WeeklyReportController extends Controller
             ], 500);
         }
     }
+
+    public function getDepartments(): JsonResponse
+    {
+        try {
+            // Get unique departments from vEmployee table
+            $departments = pgc_employee()->table('vEmployee')
+                ->select('DeptDesc')
+                ->distinct()
+                ->whereNotNull('DeptDesc')
+                ->where('DeptDesc', '!=', '')
+                ->orderBy('DeptDesc')
+                ->pluck('DeptDesc');
+
+            return response()->json([
+                'success' => true,
+                'data' => $departments->values(),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve departments',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }

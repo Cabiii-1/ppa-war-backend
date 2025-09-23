@@ -71,6 +71,7 @@ Route::group(['middleware' => ['pgcsso.checkauth', 'throttle:100,1']], function 
 
     // Additional weekly report routes (must be before apiResource)
     Route::get('/weekly-reports/department', [WeeklyReportController::class, 'getByDepartment']);
+    Route::get('/weekly-reports/departments', [WeeklyReportController::class, 'getDepartments']);
     Route::patch('/weekly-reports/{weeklyReport}/status', [WeeklyReportController::class, 'updateStatus']);
 
     // Weekly Reports CRUD routes
