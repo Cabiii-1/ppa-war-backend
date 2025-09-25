@@ -62,6 +62,17 @@ class EntryController extends Controller
                 'weekly_report_id' => 'nullable|exists:weekly_reports,id',
             ]);
 
+            // Check if trying to add to a submitted weekly report
+            if (!empty($validated['weekly_report_id']) && $validated['weekly_report_id'] !== null) {
+                $weeklyReport = WeeklyReport::find($validated['weekly_report_id']);
+                if ($weeklyReport && $weeklyReport->status === 'submitted') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Cannot add entries to a submitted weekly report',
+                    ], 403);
+                }
+            }
+
             $entry = Entry::create($validated);
 
             return response()->json([
@@ -114,6 +125,28 @@ class EntryController extends Controller
                 'weekly_report_id' => 'nullable|exists:weekly_reports,id',
             ]);
 
+            // Check if the entry is part of a submitted weekly report
+            if ($entry->weekly_report_id) {
+                $weeklyReport = WeeklyReport::find($entry->weekly_report_id);
+                if ($weeklyReport && $weeklyReport->status === 'submitted') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Cannot edit entries that are part of a submitted weekly report',
+                    ], 403);
+                }
+            }
+
+            // Also check if trying to move to a submitted weekly report
+            if (isset($validated['weekly_report_id']) && $validated['weekly_report_id']) {
+                $newWeeklyReport = WeeklyReport::find($validated['weekly_report_id']);
+                if ($newWeeklyReport && $newWeeklyReport->status === 'submitted') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Cannot move entries to a submitted weekly report',
+                    ], 403);
+                }
+            }
+
             $entry->update($validated);
 
             return response()->json([
@@ -139,6 +172,17 @@ class EntryController extends Controller
     public function destroy(Entry $entry): JsonResponse
     {
         try {
+            // Check if the entry is part of a submitted weekly report
+            if ($entry->weekly_report_id) {
+                $weeklyReport = WeeklyReport::find($entry->weekly_report_id);
+                if ($weeklyReport && $weeklyReport->status === 'submitted') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Cannot delete entries that are part of a submitted weekly report',
+                    ], 403);
+                }
+            }
+
             $weeklyReportId = $entry->weekly_report_id;
             $entry->delete();
 
@@ -167,6 +211,21 @@ class EntryController extends Controller
                 'ids' => 'required|array',
                 'ids.*' => 'integer|exists:entries,id',
             ]);
+
+            // Check if any entries are part of submitted weekly reports
+            $entriesInSubmittedReports = Entry::whereIn('id', $validated['ids'])
+                ->whereNotNull('weekly_report_id')
+                ->whereHas('weeklyReport', function ($query) {
+                    $query->where('status', 'submitted');
+                })
+                ->count();
+
+            if ($entriesInSubmittedReports > 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot delete entries that are part of submitted weekly reports',
+                ], 403);
+            }
 
             // Get weekly report IDs before deletion for cleanup
             $weeklyReportIds = Entry::whereIn('id', $validated['ids'])
