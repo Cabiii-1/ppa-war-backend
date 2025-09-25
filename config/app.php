@@ -99,11 +99,26 @@ return [
 
     'key' => env('APP_KEY'),
 
-    'previous_keys' => [
-        ...array_filter(
-            explode(',', (string) env('APP_PREVIOUS_KEYS', ''))
-        ),
-    ],
+     'previous_keys' => [
+          ...array_filter(
+              explode(',', (string) env('APP_PREVIOUS_KEYS', ''))
+          ),
+      ],
+
+      /*
+      |--------------------------------------------------------------------------
+      | AES-256-GCM Encryption Key
+      |--------------------------------------------------------------------------
+      |
+      | This key is used for AES-256-GCM encryption in the SSO authentication
+      | system. It should be a 64-character hex string (32 bytes) for proper
+      | AES-256-GCM encryption.
+      |
+      */
+
+      'aes256gcm_key' => env('APP_AES256GCM_KEY'),
+
+      /*
 
     /*
     |--------------------------------------------------------------------------
