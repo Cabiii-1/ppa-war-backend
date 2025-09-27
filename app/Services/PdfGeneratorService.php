@@ -10,22 +10,21 @@ class PdfGeneratorService
 {
     public function generateWeeklyReportPdf(WeeklyReport $weeklyReport, $user = null): string
     {
-        $weeklyReport->load(['entries']);
+        $weeklyReport->load(['entries', 'employee']);
 
-        // Use the authenticated user or fallback to mock data
+        $reportOwner = $weeklyReport->employee;
+
         $division = '';
-        if ($user && isset($user->DivDesc) && $user->DivDesc !== '-None-') {
-            $division = $user->DivDesc;
-        } elseif ($user && isset($user->division) && $user->division !== '-None-') {
-            $division = $user->division;
+        if ($reportOwner && isset($reportOwner->DivDesc) && $reportOwner->DivDesc !== '-None-') {
+            $division = $reportOwner->DivDesc;
         }
 
-        $employee = $user ? (object) [
-            'name' => $user->Fullname ?? $user->name ?? $user->emp_name ?? 'Employee Name',
-            'position' => $user->PosDesc ?? $user->position ?? 'Position Title',
-            'department' => $user->DeptDesc ?? $user->department ?? 'Department Name',
+        $employee = $reportOwner ? (object) [
+            'name' => $reportOwner->Fullname ?? 'Employee Name',
+            'position' => $reportOwner->PosDesc ?? 'Position Title',
+            'department' => $reportOwner->DeptDesc ?? 'Department Name',
             'division' => $division,
-            'emp_no' => $user->emp_no ?? $weeklyReport->employee_id ?? 'N/A',
+            'emp_no' => $reportOwner->emp_no ?? $weeklyReport->employee_id,
         ] : (object) [
             'name' => 'Employee Name',
             'position' => 'Position Title',
@@ -50,22 +49,21 @@ class PdfGeneratorService
 
     public function downloadWeeklyReportPdf(WeeklyReport $weeklyReport, $user = null): \Symfony\Component\HttpFoundation\Response
     {
-        $weeklyReport->load(['entries']);
+        $weeklyReport->load(['entries', 'employee']);
 
-        // Use the authenticated user or fallback to mock data
+        $reportOwner = $weeklyReport->employee;
+
         $division = '';
-        if ($user && isset($user->DivDesc) && $user->DivDesc !== '-None-') {
-            $division = $user->DivDesc;
-        } elseif ($user && isset($user->division) && $user->division !== '-None-') {
-            $division = $user->division;
+        if ($reportOwner && isset($reportOwner->DivDesc) && $reportOwner->DivDesc !== '-None-') {
+            $division = $reportOwner->DivDesc;
         }
 
-        $employee = $user ? (object) [
-            'name' => $user->Fullname ?? $user->name ?? $user->emp_name ?? 'Employee Name',
-            'position' => $user->PosDesc ?? $user->position ?? 'Position Title',
-            'department' => $user->DeptDesc ?? $user->department ?? 'Department Name',
+        $employee = $reportOwner ? (object) [
+            'name' => $reportOwner->Fullname ?? 'Employee Name',
+            'position' => $reportOwner->PosDesc ?? 'Position Title',
+            'department' => $reportOwner->DeptDesc ?? 'Department Name',
             'division' => $division,
-            'emp_no' => $user->emp_no ?? $weeklyReport->employee_id ?? 'N/A',
+            'emp_no' => $reportOwner->emp_no ?? $weeklyReport->employee_id,
         ] : (object) [
             'name' => 'Employee Name',
             'position' => 'Position Title',
@@ -96,22 +94,21 @@ class PdfGeneratorService
 
     public function previewWeeklyReportPdf(WeeklyReport $weeklyReport, $user = null): \Symfony\Component\HttpFoundation\Response
     {
-        $weeklyReport->load(['entries']);
+        $weeklyReport->load(['entries', 'employee']);
 
-        // Use the authenticated user or fallback to mock data
+        $reportOwner = $weeklyReport->employee;
+
         $division = '';
-        if ($user && isset($user->DivDesc) && $user->DivDesc !== '-None-') {
-            $division = $user->DivDesc;
-        } elseif ($user && isset($user->division) && $user->division !== '-None-') {
-            $division = $user->division;
+        if ($reportOwner && isset($reportOwner->DivDesc) && $reportOwner->DivDesc !== '-None-') {
+            $division = $reportOwner->DivDesc;
         }
 
-        $employee = $user ? (object) [
-            'name' => $user->Fullname ?? $user->name ?? $user->emp_name ?? 'Employee Name',
-            'position' => $user->PosDesc ?? $user->position ?? 'Position Title',
-            'department' => $user->DeptDesc ?? $user->department ?? 'Department Name',
+        $employee = $reportOwner ? (object) [
+            'name' => $reportOwner->Fullname ?? 'Employee Name',
+            'position' => $reportOwner->PosDesc ?? 'Position Title',
+            'department' => $reportOwner->DeptDesc ?? 'Department Name',
             'division' => $division,
-            'emp_no' => $user->emp_no ?? $weeklyReport->employee_id ?? 'N/A',
+            'emp_no' => $reportOwner->emp_no ?? $weeklyReport->employee_id,
         ] : (object) [
             'name' => 'Employee Name',
             'position' => 'Position Title',

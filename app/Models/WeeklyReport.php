@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class WeeklyReport extends Model
 {
@@ -31,10 +32,8 @@ class WeeklyReport extends Model
         return $this->hasMany(Entry::class);
     }
 
-    public function employee()
+    public function employee(): HasOne
     {
-        // Instead of using a relationship that might fail,
-        // we'll handle this in the service layer if needed
-        return null;
+        return $this->hasOne(Employee::class, 'emp_no', 'employee_id');
     }
 }
