@@ -94,3 +94,15 @@ Route::get('/health', function () {
         'timestamp' => now()->toDateTimeString(),
     ]);
 });
+
+// External API routes (API key protected, for third-party systems)
+Route::group(['prefix' => 'external', 'middleware' => ['api.key', 'throttle:200,1']], function () {
+    // Get weekly reports by department
+    Route::get('/weekly-reports/department/{department}', [WeeklyReportController::class, 'getByDepartmentExternal']);
+
+    // Get all weekly reports
+    Route::get('/weekly-reports', [WeeklyReportController::class, 'indexExternal']);
+
+    // Get available departments
+    Route::get('/departments', [WeeklyReportController::class, 'getDepartments']);
+});

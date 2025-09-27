@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Register custom authentication middleware
         $middleware->alias([
             'pgcsso.checkauth' => \App\Http\Middleware\ValidateAuthentication::class,
+            'api.key' => \App\Http\Middleware\ApiKeyAuth::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

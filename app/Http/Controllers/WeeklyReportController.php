@@ -410,4 +410,167 @@ class WeeklyReportController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * External API: Get all weekly reports (API key protected)
+     */
+    public function indexExternal(Request $request): JsonResponse
+    {
+        try {
+            $query = WeeklyReport::query();
+
+            if ($request->has('status')) {
+                $query->where('status', $request->status);
+            }
+
+            if ($request->has('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('employee_id', 'like', "%{$search}%")
+                        ->orWhere('id', 'like', "%{$search}%");
+                });
+            }
+
+            if ($request->has('date_from')) {
+                $query->where('period_start', '>=', $request->date_from);
+            }
+
+            if ($request->has('date_to')) {
+                $query->where('period_end', '<=', $request->date_to);
+            }
+
+            $reports = $query->withCount('entries')
+                ->orderBy('period_start', 'desc')
+                ->paginate($request->get('per_page', 15));
+
+            // Get unique employee IDs from the reports
+            $employeeIds = $reports->getCollection()->pluck('employee_id')->unique();
+
+            // Fetch employee information for these employees
+            $employeeInfo = [];
+            if ($employeeIds->isNotEmpty()) {
+                $employeeInfo = pgc_employee()->table('vEmployee')
+                    ->whereIn('emp_no', $employeeIds)
+                    ->get(['emp_no', 'DeptDesc', 'Fullname'])
+                    ->keyBy('emp_no')
+                    ->toArray();
+            }
+
+            // Add employee information to each report
+            $reports->getCollection()->transform(function ($report) use ($employeeInfo) {
+                $empInfo = $employeeInfo[$report->employee_id] ?? null;
+                $report->DeptDesc = $empInfo ? $empInfo->DeptDesc : null;
+                $report->FullName = $empInfo ? $empInfo->Fullname : null;
+
+                return $report;
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => $reports,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve weekly reports',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * External API: Get weekly reports by department (API key protected)
+     */
+    public function getByDepartmentExternal(Request $request, string $department): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'status' => 'sometimes|string|in:draft,submitted',
+                'per_page' => 'sometimes|integer|min:1|max:100',
+                'search' => 'sometimes|string',
+                'date_from' => 'sometimes|date',
+                'date_to' => 'sometimes|date',
+            ]);
+
+            // Get employee IDs from the specified department
+            $employeeIds = pgc_employee()->table('vEmployee')
+                ->where('DeptDesc', $department)
+                ->pluck('emp_no');
+
+            if ($employeeIds->isEmpty()) {
+                return response()->json([
+                    'success' => true,
+                    'data' => [
+                        'data' => [],
+                        'current_page' => 1,
+                        'total' => 0,
+                        'per_page' => $request->get('per_page', 15),
+                        'last_page' => 1,
+                        'from' => null,
+                        'to' => null,
+                    ],
+                    'message' => 'No employees found in the specified department',
+                ]);
+            }
+
+            $query = WeeklyReport::whereIn('employee_id', $employeeIds);
+
+            if (isset($validated['status'])) {
+                $query->where('status', $validated['status']);
+            }
+
+            if ($request->has('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('employee_id', 'like', "%{$search}%")
+                        ->orWhere('id', 'like', "%{$search}%");
+                });
+            }
+
+            if ($request->has('date_from')) {
+                $query->where('period_start', '>=', $request->date_from);
+            }
+
+            if ($request->has('date_to')) {
+                $query->where('period_end', '<=', $request->date_to);
+            }
+
+            $reports = $query->withCount('entries')
+                ->orderBy('period_start', 'desc')
+                ->paginate($request->get('per_page', 15));
+
+            // Get unique employee IDs from the reports
+            $reportEmployeeIds = $reports->getCollection()->pluck('employee_id')->unique();
+
+            // Fetch employee information for these employees
+            $employeeInfo = [];
+            if ($reportEmployeeIds->isNotEmpty()) {
+                $employeeInfo = pgc_employee()->table('vEmployee')
+                    ->whereIn('emp_no', $reportEmployeeIds)
+                    ->get(['emp_no', 'DeptDesc', 'Fullname'])
+                    ->keyBy('emp_no')
+                    ->toArray();
+            }
+
+            // Add employee information to each report
+            $reports->getCollection()->transform(function ($report) use ($employeeInfo) {
+                $empInfo = $employeeInfo[$report->employee_id] ?? null;
+                $report->DeptDesc = $empInfo ? $empInfo->DeptDesc : null;
+                $report->FullName = $empInfo ? $empInfo->Fullname : null;
+
+                return $report;
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => $reports,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve weekly reports by department',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }

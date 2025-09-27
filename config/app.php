@@ -119,6 +119,18 @@ return [
       'aes256gcm_key' => env('APP_AES256GCM_KEY'),
 
       /*
+      |--------------------------------------------------------------------------
+      | External API Key
+      |--------------------------------------------------------------------------
+      |
+      | This key is used for external API access to allow third-party systems
+      | to access specific endpoints. Should be a long, random string.
+      |
+      */
+
+      'external_api_key' => env('EXTERNAL_API_KEY'),
+
+      /*
 
     /*
     |--------------------------------------------------------------------------
