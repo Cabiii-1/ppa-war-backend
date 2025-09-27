@@ -63,7 +63,7 @@ class EntryController extends Controller
             ]);
 
             // Check if trying to add to a submitted weekly report
-            if (!empty($validated['weekly_report_id']) && $validated['weekly_report_id'] !== null) {
+            if (! empty($validated['weekly_report_id']) && $validated['weekly_report_id'] !== null) {
                 $weeklyReport = WeeklyReport::find($validated['weekly_report_id']);
                 if ($weeklyReport && $weeklyReport->status === 'submitted') {
                     return response()->json([
@@ -71,6 +71,39 @@ class EntryController extends Controller
                         'message' => 'Cannot add entries to a submitted weekly report',
                     ], 403);
                 }
+            }
+
+            // Check if the entry date falls within any existing weekly report period for this employee
+            $existingReport = WeeklyReport::where('employee_id', $validated['employee_id'])
+                ->where('period_start', '<=', $validated['entry_date'])
+                ->where('period_end', '>=', $validated['entry_date'])
+                ->first();
+
+            if ($existingReport) {
+                // If the existing report is submitted, prevent adding new entries
+                if ($existingReport->status === 'submitted') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Cannot add entries for dates that are part of an already submitted weekly report. The entry date falls within a submitted report period.',
+                    ], 403);
+                }
+
+                // If the report is not submitted (draft), automatically assign the entry to it
+                $validated['weekly_report_id'] = $existingReport->id;
+            } else {
+                // No existing weekly report found, create a new one automatically
+                $entryDate = \Carbon\Carbon::parse($validated['entry_date']);
+                $weekStart = $entryDate->copy()->startOfWeek(\Carbon\Carbon::MONDAY);
+                $weekEnd = $entryDate->copy()->endOfWeek(\Carbon\Carbon::FRIDAY);
+
+                $newWeeklyReport = WeeklyReport::create([
+                    'employee_id' => $validated['employee_id'],
+                    'period_start' => $weekStart->format('Y-m-d'),
+                    'period_end' => $weekEnd->format('Y-m-d'),
+                    'status' => 'draft',
+                ]);
+
+                $validated['weekly_report_id'] = $newWeeklyReport->id;
             }
 
             $entry = Entry::create($validated);
